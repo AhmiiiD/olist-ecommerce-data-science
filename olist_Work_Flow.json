@@ -1,0 +1,176 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -112
+      ],
+      "id": "1329497e-96ca-4e48-ace8-d4f14e74a99e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    COUNT(*) FILTER (WHERE is_late = 1) * 100.0 / COUNT(*) AS late_percentage\nFROM orders;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -144,
+        -96
+      ],
+      "id": "daa7c0fe-b90b-4023-aaf2-1f5b8c8a307a",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "nr9u5HSHgHZMk7FL",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "96963b98-6c31-4e65-b0a5-2fbb976b1c10",
+              "leftValue": "={{ $json.late_percentage }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "a5f9dae0-cc27-4704-88a3-46d4fe7b45b8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e7920f75-8209-473a-8b08-e10c55c14634",
+              "name": "alert_message",
+              "value": "=   ⚠️ Alert: Late delivery rate is {{ $json.late_percentage }}%, exceeding the 10% threshold.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        -208
+      ],
+      "id": "a989dcff-3a6f-435f-8e14-25a40ccdf41c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "515810828",
+        "text": "=⚠️ تحذير: نسبة الطلبات المتأخرة وصلت {{ $json.late_percentage }}%",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "1875b618-51df-45de-b11f-797f28199018",
+      "name": "Send a text message",
+      "webhookId": "30dc4aa9-e943-4faf-9825-0928a1023699",
+      "credentials": {
+        "telegramApi": {
+          "id": "dVOICM6RLn6pdLO3",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b9e7b31e-ff58-44aa-872b-ca272b30ef8f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca351f4e1df4bb41561e884cecb456502c700ac12d9440a830293ad450593d1d"
+  },
+  "nodeGroups": [],
+  "id": "XnPInRyfnRApwg0B",
+  "tags": []
+}
