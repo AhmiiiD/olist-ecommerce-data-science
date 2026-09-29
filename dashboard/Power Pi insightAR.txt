@@ -1,0 +1,32 @@
+# 📊 Power BI Dashboard — Olist E-Commerce Intelligence
+
+## Page 1 — Executive Overview
+- 5 مؤشرات أساسية: Total Orders (96,478)، Total Revenue (R$ 15.4M)، Average Order Value (R$ 159.86)، Average Review Score (4.16)، Late Delivery % (6.77%)
+- Monthly Revenue Trend يوضح نمو الإيرادات عبر الوقت
+- Top 10 Categories وTop States by Revenue: São Paulo تتصدر بفارق كبير (~37% من الإيراد الكلي)
+
+## Page 2 — Sales
+- تحليل الإيراد حسب يوم الأسبوع والربع السنوي لاكتشاف الأنماط الموسمية
+- توزيع طرق الدفع (Payment Type) عبر Donut Chart
+- متوسط قيمة الطلب حسب الفئة (Top 10)
+- Slicers تفاعلية للسنة والولاية لتصفية كامل الصفحة
+
+## Page 3 — Customers
+- Total Unique Customers: 93,358 (باستخدام customer_unique_id الصحيح)
+- Repeat vs One-Time Customers (Pie Chart) يوضح بصريًا أن 97% من العملاء يشترون مرة واحدة فقط
+- خريطة توزيع العملاء جغرافيًا (Filled Map) مع أعلى 10 مدن/ولايات
+- توزيع قيمة الإنفاق للعملاء (Customer Value Distribution)
+
+## Page 4 — Delivery
+- متوسط مدة التوصيل: 12.10 يوم | متوسط التأخير: -11.88 يوم | نسبة التأخير: 6.76%
+- أبطأ 10 ولايات في التوصيل: كلها من منطقة الأمازون الشمالية (RR, SE, RO, RN, TO...) بمعدل يفوق 20 يوم
+- توزيع Delivery Delay عبر Histogram
+- علاقة مباشرة بين التقييم (Review Score) ومتوسط أيام التوصيل — التقييمات المنخفضة مرتبطة بتوصيل أبطأ
+
+## Page 5 — ML Results
+- Model Accuracy Card من نموذج Random Forest المدرّب لتوقع رضا العميل
+- Confusion Matrix تعرض التطابق بين التصنيف الفعلي (satisfaction) والمتوقع (predicted_satisfaction)
+- جدول Orders عالية الخطورة: الطلبات التي يتوقع النموذج عدم رضا العميل عنها (predicted_satisfaction = Unsatisfied)، مفيد لفرق خدمة العملاء للتدخل الاستباقي
+
+## 🎯 القيمة العملية للداشبورد
+الداشبورد يحول نتائج التحليل والنمذجة (EDA + ML) إلى أداة قرار تفاعلية يمكن لفرق العمل (المبيعات، اللوجستيات، خدمة العملاء) استخدامها مباشرة دون الحاجة للرجوع للكود أو الـ notebooks.

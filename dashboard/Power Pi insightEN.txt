@@ -1,0 +1,39 @@
+
+# 📊 Power BI Dashboard — Olist E-Commerce Intelligence
+
+## Page 1 — Executive Overview
+
+* **5 Core KPIs:** Total Orders (96,478), Total Revenue (R$ 15.4M), Average Order Value (R$ 159.86), Average Review Score (4.16), and Late Delivery Rate (6.77%).
+* **Monthly Revenue Trend:** Visualizes revenue growth and trajectory over time.
+* **Top 10 Categories & Top States by Revenue:** Displays top performance metrics, with São Paulo leading significantly (~37% of total revenue).
+
+## Page 2 — Sales
+
+* **Temporal Analysis:** Revenue broken down by day of the week and quarter to identify seasonal purchasing patterns.
+* **Payment Method Distribution:** Donut chart illustrating payment type breakdowns.
+* **Average Order Value by Category:** Top 10 categories ranked by average spend per order.
+* **Interactive Slicers:** Dynamic Year and State filters to refine all page visuals seamlessly.
+
+## Page 3 — Customers
+
+* **Total Unique Customers:** 93,358 (calculated using the accurate `customer_unique_id`).
+* **Repeat vs. One-Time Customers:** Pie chart highlighting that ~97% of customers are one-time buyers.
+* **Geographic Distribution:** Filled map depicting customer density across the top 10 cities and states.
+* **Customer Value Distribution:** Granular breakdown of customer spending brackets.
+
+## Page 4 — Delivery
+
+* **Core Logistics KPIs:** Average Delivery Time: 12.10 days | Average Delay: -11.88 days | Late Delivery Rate: 6.76%.
+* **Top 10 Slowest States:** Concentrated in the Northern Amazonian region (RR, SE, RO, RN, TO...), averaging over 20 delivery days.
+* **Delivery Delay Distribution:** Histogram showcasing delivery time variances.
+* **Satisfaction Correlation:** Clear inverse relationship between Review Score and average delivery days — lower scores strongly correlate with longer delivery times.
+
+## Page 5 — ML Results
+
+* **Model Accuracy Card:** Displays the accuracy metric from the Random Forest model trained to predict customer satisfaction.
+* **Confusion Matrix:** Matrix visual comparing actual satisfaction classifications against model predictions (`predicted_satisfaction`).
+* **High-Risk Orders Table:** Filtered table isolating orders predicted as `Unsatisfied`, enabling customer service teams to trigger proactive outreach.
+
+## 🎯 Practical Business Value
+
+This dashboard transforms exploratory analysis and machine learning outcomes (EDA + ML) into an interactive decision-making tool. Operations, Sales, Logistics, and Customer Support teams can directly derive actionable insights without relying on raw code or Jupyter Notebooks.

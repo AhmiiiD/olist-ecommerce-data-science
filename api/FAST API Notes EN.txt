@@ -1,0 +1,101 @@
+
+# 🚀 FastAPI — Customer Satisfaction Prediction API
+
+## Objective
+
+Convert the trained Random Forest model (Customer Satisfaction) into a callable API that receives new order details and returns a prediction (`Satisfied` / `Unsatisfied`).
+
+## Steps Executed
+
+**1. Saving Model & Encoders:**
+
+* Trained a Random Forest model on the `olist_dashboard_data.csv` dataset.
+* Saved the trained model along with the `LabelEncoder` objects for categorical columns (`payment_type`, `customer_state`, `product_category_name_english`) into a single file: `satisfaction_model.pkl`.
+* Saving the encoders is necessary to ensure new input data is preprocessed identically to the training data.
+
+**2. Building the API (`main.py`):**
+
+* Utilized **FastAPI** + **Pydantic** to define the expected request payload schema (`OrderInput`).
+* Created a root endpoint `/` to verify API health.
+* Created the core endpoint `/predict` to process order data and yield predictions.
+
+**3. Resolved Issues:**
+
+* **Terminal Path Issue:** Folder paths containing spaces (e.g., `"My Project C.V"`) require enclosing in quotation marks when navigating via `cd`, and executing commands separately.
+* **`AttributeError: 'list' object has no attribute 'dtype'`:** Occurred due to converting `le.classes_` (a NumPy array) into a standard Python list when appending an `"unknown"` category to handle unseen data. Resolved by using `np.append()` instead of `list() + []` to maintain data type compatibility with `LabelEncoder`.
+
+**4. Running and Testing the API:**
+
+```bash
+uvicorn main:app --reload
+
+```
+
+* Accessed the interactive documentation (Swagger UI) at `[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)`.
+* Tested the `/predict` endpoint via **Try it out** → Entered JSON body → **Execute**.
+* Result: Received a successful response `{"prediction": "Satisfied"}`.
+
+## Final Code (`main.py`)
+
+```python
+import pickle
+from fastapi import FastAPI
+import numpy as np
+import pandas as pd
+from pydantic import BaseModel
+
+with open('satisfaction_model.pkl', 'rb') as f:
+  saved = pickle.load(f)
+
+model = saved['model']
+encoders = saved['encoders']
+features = saved['features']
+
+app = FastAPI(title='Olist Customer Satisfaction API')
+
+
+class OrderInput(BaseModel):
+  order_value: float
+  freight_value: float
+  number_of_items: int
+  payment_type: str
+  payment_installments: int
+  delivery_days: float
+  delivery_delay: float
+  is_late: int
+  customer_order_count: int
+  previous_orders: int
+  customer_state: str
+  product_category_name_english: str
+
+
+@app.get('/')
+def home():
+  return {'message': 'Olist Customer Satisfaction Prediction API'}
+
+
+@app.post('/predict')
+def predict(order: OrderInput):
+  data = pd.DataFrame([order.dict()])
+
+  for col in [
+      'payment_type',
+      'customer_state',
+      'product_category_name_english',
+  ]:
+    le = encoders[col]
+    if 'unknown' not in le.classes_:
+      le.classes_ = np.append(le.classes_, 'unknown')
+    data[col] = data[col].apply(lambda x: x if x in le.classes_ else 'unknown')
+    data[col] = le.transform(data[col])
+
+  prediction = model.predict(data[features])[0]
+  result = 'Satisfied' if prediction == 1 else 'Unsatisfied'
+
+  return {'prediction': result}
+
+```
+
+## Key Takeaway
+
+Handling unseen categorical values in production environments is a major challenge in model deployment. The solution implemented here dynamically extends the `LabelEncoder` to support an `"unknown"` category, preventing API runtime failures when encountering unexpected input values.

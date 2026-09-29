@@ -1,0 +1,84 @@
+# 🚀 FastAPI — Customer Satisfaction Prediction API
+
+## الهدف
+تحويل موديل Random Forest المدرّب (Customer Satisfaction) إلى API قابل للاستدعاء، يستقبل بيانات طلب جديد ويرجع توقع (Satisfied/Unsatisfied).
+
+## الخطوات المنفذة
+
+**1. حفظ الموديل والـ Encoders:**
+- تم تدريب Random Forest على بيانات olist_dashboard_data.csv
+- تم حفظ الموديل مع الـ LabelEncoders الخاصة بكل عمود نصي (payment_type, customer_state, product_category_name_english) في ملف واحد satisfaction_model.pkl
+- حفظ الـ encoders ضروري لضمان تحويل أي بيانات جديدة بنفس الطريقة التي تدرب بها الموديل
+
+**2. بناء الـ API (main.py):**
+- استخدام FastAPI + Pydantic لتعريف شكل البيانات المتوقعة (OrderInput)
+- Endpoint أساسي `/` للتأكد من عمل الـ API
+- Endpoint رئيسي `/predict` يستقبل بيانات الطلب ويرجع التوقع
+
+**3. مشاكل تم حلها:**
+- **مشكلة المسار في Terminal:** أسماء الفولدرات التي تحتوي مسافات (مثل "My Project C.V") تتطلب وضعها بين علامتي تنصيص عند استخدام cd، وكتابة كل أمر (cd ثم uvicorn) في سطر منفصل
+- **AttributeError: 'list' object has no attribute 'dtype':** حدثت بسبب تحويل le.classes_ (numpy array) إلى list عادي عند إضافة فئة "unknown" جديدة للتعامل مع قيم غير موجودة وقت التدريب. تم الحل باستخدام np.append() بدل list() + []، للحفاظ على نوع البيانات المتوافق مع LabelEncoder
+
+**4. تشغيل واختبار الـ API:**
+```bash
+uvicorn main:app --reload
+```
+- الوصول للواجهة التفاعلية (Swagger UI): `http://127.0.0.1:8000/docs`
+- اختبار `/predict` عبر Try it out → إدخال JSON → Execute
+- النتيجة: استجابة ناجحة `{"prediction": "Satisfied"}`
+
+## الكود النهائي (main.py)
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+import pickle
+import pandas as pd
+import numpy as np
+
+with open('satisfaction_model.pkl', 'rb') as f:
+    saved = pickle.load(f)
+    
+model = saved['model']
+encoders = saved['encoders']
+features = saved['features']
+
+app = FastAPI(title="Olist Customer Satisfaction API")
+
+class OrderInput(BaseModel):
+    order_value: float
+    freight_value: float
+    number_of_items: int
+    payment_type: str
+    payment_installments: int
+    delivery_days: float
+    delivery_delay: float
+    is_late: int
+    customer_order_count: int
+    previous_orders: int
+    customer_state: str
+    product_category_name_english: str
+
+@app.get("/")
+def home():
+    return {"message": "Olist Customer Satisfaction Prediction API"}
+
+@app.post("/predict")
+def predict(order: OrderInput):
+    data = pd.DataFrame([order.dict()])
+    
+    for col in ['payment_type', 'customer_state', 'product_category_name_english']:
+        le = encoders[col]
+        if 'unknown' not in le.classes_:
+            le.classes_ = np.append(le.classes_, 'unknown')
+        data[col] = data[col].apply(lambda x: x if x in le.classes_ else 'unknown')
+        data[col] = le.transform(data[col])
+    
+    prediction = model.predict(data[features])[0]
+    result = "Satisfied" if prediction == 1 else "Unsatisfied"
+    
+    return {"prediction": result}
+```
+
+## الدرس المستفاد
+التعامل مع فئات جديدة (Unseen Categories) في بيانات الإنتاج هو تحدٍ حقيقي في نشر الموديلات (Model Deployment) — الحل هنا كان توسيع الـ LabelEncoder ديناميكيًا لإضافة فئة "unknown" بدلاً من فشل الـ API عند مواجهة قيمة غير متوقعة.
