@@ -64,6 +64,11 @@ docker run -d -p 8000:8000 olist-satisfaction-api
 
 Then check `http://127.0.0.1:8000/docs` for the interactive API docs.
 
+## Automation (n8n)
+
+Added a small automation layer on top of the FastAPI/database setup — an n8n workflow that queries PostgreSQL for the current late-delivery rate and sends a Telegram alert if it crosses a 10% threshold. Not something the project strictly needed, but it was a good excuse to connect something I already knew (n8n) to the rest of the pipeline, and it's the kind of monitoring piece that would matter in a real production setup.
+
+Workflow: `automation/late_delivery_alert.json`
 ## Stack
 
 Python, pandas, PostgreSQL, scikit-learn, XGBoost, TensorFlow/Keras, Hugging Face Transformers (MarianMT), Power BI, FastAPI, Docker, Git,N8N
